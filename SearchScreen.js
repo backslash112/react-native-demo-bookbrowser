@@ -12,7 +12,7 @@ var {
 } = React;
 
 var SearchScreen = React.createClass({
-
+	
 	gotoResultsScreen: function(searchPhrase) {
 		this.props.navigator.push({
 			title: 'Results',

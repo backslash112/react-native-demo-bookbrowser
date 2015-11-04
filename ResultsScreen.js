@@ -9,7 +9,26 @@ var {
 
 } = React;
 
+var buildUrl = function(g) {
+	return 'https://www.googleapis.com/books/v1/volumes?q=' 
+		+ encodeURIComponent(g) 
+		+ '&langRestrict=en&maxResults=40';
+};
+
 var ResultsScreen = React.createClass({
+	
+	componentDidMount: function() {
+		console.log('SearchScreen componentDidMount');
+		this.fetchResults(this.props.searchPhrase);
+	},
+
+	fetchResults: function(searchPhrase) {
+		fetch(buildUrl(searchPhrase))
+			.then(response => response.json())
+			.then(jsonData => console.dir(jsonData))
+			.catch(error => console.dir(error));
+	},
+
 	render: function() {
 		return (
 			<View style={styles.container}>
