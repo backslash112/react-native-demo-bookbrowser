@@ -14,7 +14,7 @@ var ResultsScreen = React.createClass({
 		return (
 			<View style={styles.container}>
 				<Text style={styles.label}>
-					This is the results screen
+					You searched for: {this.props.searchPhrase}
 				</Text>
 			</View>);
 	}

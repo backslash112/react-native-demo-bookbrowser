@@ -13,10 +13,11 @@ var {
 
 var SearchScreen = React.createClass({
 
-	gotoResultsScreen: function() {
+	gotoResultsScreen: function(searchPhrase) {
 		this.props.navigator.push({
 			title: 'Results',
 			component: ResultsScreen,
+			passProps: {'searchPhrase': searchPhrase },
 		});
 
 	},
@@ -33,12 +34,12 @@ var SearchScreen = React.createClass({
 			</Text>
 			<TextInput 
 			style={styles.textInput} 
-			placeholder="e.g. JavaScript of Mobile"
+			placeholder={this.props.placeholder}
 			returnKeyType="search"
 			enablesReturnKeyAutomtically={true}
 			onEndEditing={ event =>
 				// console.log(event.nativeEvent.text)
-				this.gotoResultsScreen()
+				this.gotoResultsScreen(event.nativeEvent.text)
 			} />
 			</View>
 			);
