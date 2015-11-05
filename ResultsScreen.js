@@ -17,6 +17,12 @@ var buildUrl = function(g) {
 
 var ResultsScreen = React.createClass({
 	
+	getInitialState: function() {
+		return {
+			isLoading: true,
+			};
+	},
+
 	componentDidMount: function() {
 		console.log('SearchScreen componentDidMount');
 		this.fetchResults(this.props.searchPhrase);
@@ -25,17 +31,44 @@ var ResultsScreen = React.createClass({
 	fetchResults: function(searchPhrase) {
 		fetch(buildUrl(searchPhrase))
 			.then(response => response.json())
-			.then(jsonData => console.dir(jsonData))
+			.then(jsonData => {
+				setTimeout(() => {
+					this.setState({ isLoading: false });
+				}, 2000);
+				console.dir(jsonData);
+			})
 			.catch(error => console.dir(error));
 	},
 
 	render: function() {
+		if (this.state.isLoading) {
+			return this.renderLoadingMessage()
+		} else {
+			return this.renderReseults()
+		}
+	},
+
+	renderLoadingMessage: function() {
 		return (
 			<View style={styles.container}>
 				<Text style={styles.label}>
-					You searched for: {this.props.searchPhrase}
+					Searching for {this.props.searchPhrase}
 				</Text>
-			</View>);
+				<Text style={styles.label}>
+					Please wait...
+				</Text>
+			</View>
+			);
+	},
+
+	renderReseults: function() {
+		return (
+			<View style={styles.container}>
+				<Text style={styles.label}>
+					Finished Searching.
+				</Text>
+			</View>
+			);
 	}
 });
 
