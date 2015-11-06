@@ -2,6 +2,7 @@
 
 var React = require('react-native');
 var BookDetails = require('./BookDetails');
+var Modal = require('react-native-modal');
 
 var {
 	StyleSheet,
@@ -10,10 +11,11 @@ var {
 	ListView,
 	Image,
 	TouchableHighlight,
+	TouchableOpacity,
 } = React;
 
 var buildUrl = function(g) {
-	var url = 'https://www.googleapis.com/books/v1/volumes?q=' 
+	var url = 'https://www.gooogleapis.com/books/v1/volumes?q=' 
 	+ encodeURIComponent(g) 
 	+ '&langRestrict=en&maxResults=40';
 	console.log(url);
@@ -25,6 +27,7 @@ var ResultsScreen = React.createClass({
 	getInitialState: function() {
 		return {
 			isLoading: true,
+			showErrorModal: false,
 			dataSource: new ListView.DataSource({
 				rowHasChanged: (row1, row2) => row1 !== row2,
 			}),
@@ -32,7 +35,6 @@ var ResultsScreen = React.createClass({
 	},
 
 	componentDidMount: function() {
-		console.log('SearchScreen componentDidMount');
 		this.fetchResults(this.props.searchPhrase);
 	},
 
@@ -48,27 +50,55 @@ var ResultsScreen = React.createClass({
 			}, 2000);
 			console.dir(jsonData);
 		})
-		.catch(error => console.dir(error));
+		.catch(error => {
+			this.setState({
+				showErrorModal: true
+			});
+		});
 	},
 
 	render: function() {
 		if (this.state.isLoading) {
 			return this.renderLoadingMessage();
 		} else {
-			// return this.renderLoadingMessage();
 			return this.renderResults();
 		}
 	},
-
+				
+	// customCloseButton={this.renderModalButtons}
 	renderLoadingMessage: function() {
 		return (
 			<View style={styles.container}>
-			<Text style={styles.label}>
-			Searching for {this.props.searchPhrase}.
-			</Text>
-			<Text style={styles.label}>
-			Please wait...{this.state.isLoading ? "true" : "false"}
-			</Text>
+				<Text style={styles.label}>
+					Searching for {this.props.searchPhrase}.
+				</Text>
+				<Text style={styles.label}>
+					Please wait...{this.state.isLoading ? "true" : "false"}
+				</Text>
+				<Modal isVisible={this.state.showErrorModal}>
+					<Text style={styles.modalBody}> A network error occurred! </Text>
+				</Modal>
+			</View>
+			);
+	},
+
+	renderModalButtons: function() {
+		return (
+			<View style={styles.modalButtonsContanier}>
+				<TouchableOpacity onPress={this.goback}>
+					<View style={styles.modalButton}>
+						<Text style={styles.modalButtonText}>
+							&lt; Go back
+						</Text>
+					</View>
+				</TouchableOpacity>
+				<TouchableOpacity onPress={this.retry}> 
+					<View style={styles.modalButton}>
+						<Text style={styles.modalButtonText}>
+							&#8635 Retry
+						</Text>
+					</View>
+				</TouchableOpacity>
 			</View>
 			);
 	},
@@ -106,6 +136,18 @@ var ResultsScreen = React.createClass({
 				'book': book
 			}
 		});
+	},
+	goback: function() {
+		this.setState({
+			showErrorModal: false
+		});
+		this.props.navigator.pop();
+	},
+	retry: function() {
+		this.setState({
+			showErrorModal: false
+		});
+		this.fetchResults();
 	},
 });
 
@@ -152,6 +194,30 @@ var styles = StyleSheet.create({
 	rightContainer: {
 		flex: 1,
 
+	},
+	modalButtonsContanier: {
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'center',
+		top: 240,
+	},
+	modalBody: {
+		fontSize: 18,
+	},
+	modalButton: {
+		borderColor: '#ffffff',
+		borderWidth: 1,
+		borderRadius: 4,
+		marginLeft: 20,
+		marginRight: 20,
+		paddingLeft: 20,
+		paddingRight: 20,
+		paddingTop: 10,
+		paddingBottom: 10,
+	},
+	modalButtonText: {
+		fontSize: 18,
+		color: '#ffffff',
 	},
 
 });
