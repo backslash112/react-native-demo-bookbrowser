@@ -1,6 +1,7 @@
 'use strict';
 
 var React = require('react-native');
+var BookDetails = require('./BookDetails');
 
 var {
 	StyleSheet,
@@ -8,12 +9,15 @@ var {
 	Text,
 	ListView,
 	Image,
+	TouchableHighlight,
 } = React;
 
 var buildUrl = function(g) {
-	return 'https://www.googleapis.com/books/v1/volumes?q=' 
+	var url = 'https://www.googleapis.com/books/v1/volumes?q=' 
 	+ encodeURIComponent(g) 
 	+ '&langRestrict=en&maxResults=40';
+	console.log(url);
+	return url;
 };
 
 var ResultsScreen = React.createClass({
@@ -79,21 +83,29 @@ var ResultsScreen = React.createClass({
 
 	renderBook: function(book) {
 		return (
-			<View style={styles.row}>
-			<Image style={styles.thumbnail}
-				source={{
-					uri: book.volumeInfo.imageLinks.smallThumbnail
-				}} />
-			<View style={styles.rightContainer}>
-				<Text style={styles.title}>
-				{book.volumeInfo.title}
-				</Text>
-				<Text style={styles.subtitle}>
-				{book.volumeInfo.subtitle}
-				</Text>
-			</View>
-			</View>
+			<TouchableHighlight onPress={() => 
+				this.showBookDetails(book) }>
+				<View style={styles.row}>
+					<Image style={styles.thumbnail}
+						source={{
+							uri: book.volumeInfo.imageLinks.smallThumbnail
+						}} />
+					<View style={styles.rightContainer}>
+						<Text style={styles.title}> {book.volumeInfo.title} </Text>
+						<Text style={styles.subtitle}> {book.volumeInfo.subtitle} </Text>
+					</View>
+				</View>
+			</TouchableHighlight>
 			);
+	},
+	showBookDetails: function(book) {
+		this.props.navigator.push({
+			title: book.volumeInfo.title,
+			component: BookDetails,
+			passProps: {
+				'book': book
+			}
+		});
 	},
 });
 
