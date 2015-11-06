@@ -6,13 +6,14 @@ var {
 	StyleSheet,
 	View,
 	Text,
-
+	ListView,
+	Image,
 } = React;
 
 var buildUrl = function(g) {
 	return 'https://www.googleapis.com/books/v1/volumes?q=' 
-		+ encodeURIComponent(g) 
-		+ '&langRestrict=en&maxResults=40';
+	+ encodeURIComponent(g) 
+	+ '&langRestrict=en&maxResults=40';
 };
 
 var ResultsScreen = React.createClass({
@@ -20,7 +21,10 @@ var ResultsScreen = React.createClass({
 	getInitialState: function() {
 		return {
 			isLoading: true,
-			};
+			dataSource: new ListView.DataSource({
+				rowHasChanged: (row1, row2) => row1 !== row2,
+			}),
+		};
 	},
 
 	componentDidMount: function() {
@@ -30,46 +34,67 @@ var ResultsScreen = React.createClass({
 
 	fetchResults: function(searchPhrase) {
 		fetch(buildUrl(searchPhrase))
-			.then(response => response.json())
-			.then(jsonData => {
-				setTimeout(() => {
-					this.setState({ isLoading: false });
-				}, 2000);
-				console.dir(jsonData);
-			})
-			.catch(error => console.dir(error));
+		.then(response => response.json())
+		.then(jsonData => {
+			setTimeout(() => {
+				this.setState({ 
+					isLoading: false,
+					dataSource: this.state.dataSource.cloneWithRows(jsonData.items),
+				});
+			}, 2000);
+			console.dir(jsonData);
+		})
+		.catch(error => console.dir(error));
 	},
 
 	render: function() {
 		if (this.state.isLoading) {
-			return this.renderLoadingMessage()
+			return this.renderLoadingMessage();
 		} else {
-			return this.renderReseults()
+			// return this.renderLoadingMessage();
+			return this.renderResults();
 		}
 	},
 
 	renderLoadingMessage: function() {
 		return (
 			<View style={styles.container}>
-				<Text style={styles.label}>
-					Searching for {this.props.searchPhrase}
-				</Text>
-				<Text style={styles.label}>
-					Please wait...
-				</Text>
+			<Text style={styles.label}>
+			Searching for {this.props.searchPhrase}.
+			</Text>
+			<Text style={styles.label}>
+			Please wait...{this.state.isLoading ? "true" : "false"}
+			</Text>
 			</View>
 			);
 	},
 
-	renderReseults: function() {
+	renderResults: function() {
 		return (
-			<View style={styles.container}>
-				<Text style={styles.label}>
-					Finished Searching.
+			<ListView
+			dataSource={this.state.dataSource}
+			renderRow={this.renderBook} />
+			);
+	},
+
+	renderBook: function(book) {
+		return (
+			<View style={styles.row}>
+			<Image style={styles.thumbnail}
+				source={{
+					uri: book.volumeInfo.imageLinks.smallThumbnail
+				}} />
+			<View style={styles.rightContainer}>
+				<Text style={styles.title}>
+				{book.volumeInfo.title}
+				</Text>
+				<Text style={styles.subtitle}>
+				{book.volumeInfo.subtitle}
 				</Text>
 			</View>
+			</View>
 			);
-	}
+	},
 });
 
 var styles = StyleSheet.create({
@@ -85,6 +110,38 @@ var styles = StyleSheet.create({
 		fontWeight: 'normal',
 		color: '#fff',
 	},
+	ListView: {
+
+	},
+	row: {
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: '#5ac8fa',
+		paddingRight: 20,
+		marginTop: 1,
+	},
+	title: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#fff',
+	},
+	subtitle: {
+		fontSize: 16,
+		fontWeight: 'normal',
+		color: '#fff',
+	},
+	thumbnail: {
+		width: 70,
+		height: 108,
+		marginRight: 16,
+	},
+	rightContainer: {
+		flex: 1,
+
+	},
+
 });
 
 module.exports = ResultsScreen;
